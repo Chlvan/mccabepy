@@ -54,7 +54,8 @@ mccabe('methanol', 'water', xd = 0.95, xb = 0.1, P = 1)
 
 ![image](https://github.com/Victor-Liang-ChE/mccabepy/assets/112746859/a2e34606-5c08-4e4b-88d5-bfed572103b1)
 
-mccabe('methanol', 'water', xd = 0.95, xb = 0.01, P = 1, q = 1, R = 3)
+mccabe('acetone', 'benzene', xd = 0.9, xb = 0.01, T = 298, q = 1.2, R = 3)
 
-![image](https://github.com/Victor-Liang-ChE/mccabepy/assets/112746859/7fc3b6ff-b295-44ba-bcff-01082478eb4f)
+![image](https://github.com/Victor-Liang-ChE/mccabepy/assets/112746859/4785d239-66b7-402b-a5ba-af4dc924ebb4)
+
 
