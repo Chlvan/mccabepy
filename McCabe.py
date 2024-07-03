@@ -45,7 +45,10 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
             return None
 
     # Get the equilibrium data
-    xi, yi = xy(comp1, comp2, P = P, values = True, show = False)
+    if Pgiven:
+        xi, yi = xy(comp1, comp2, P = P, values = True, show = False)
+    else:
+        xi, yi = xy(comp1, comp2, T = T, values = True, show = False)
 
     # Fit a curve to the data
     z = np.polyfit(xi, yi, 30)
@@ -201,6 +204,6 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
             return xs, ys
 
 # %%
-mccabe('methanol', 'water', xd = 0.99, xb = 0.01, P = 1, q = 1, R = 3)
-mccabe('methanol', 'water', xd = 0.99, xb = 0.1, P = 1)
+mccabe('acetone', 'benzene', xd = 0.9, xb = 0.01, T = 298, q = 1.2, R = 3)
+#mccabe('acetone', 'benzene', xd = 0.97, xb = 0.1, P = 1)
 # %%
