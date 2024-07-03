@@ -34,6 +34,8 @@ Consider swapping the first component with the second component as a possible so
 
 Dependencies:
 
+-phasepy
+
 -matplotlib.pyplot
 
 -numpy
