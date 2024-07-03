@@ -50,6 +50,6 @@ Examples:
 
 mccabe('methanol', 'water', xd = 0.95, xb = 0.1, P = 1)
 
-![image](https://github.com/Chlvan/mccabepy/assets/112746859/e09f0f86-c7da-4fee-8f37-fdce32e16e18)
+![image](https://github.com/Chlvan/mccabepy/assets/112746859/14cdcbab-1358-4ff6-b03e-981457804715)
 
 Steps = 4
