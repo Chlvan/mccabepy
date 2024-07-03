@@ -52,6 +52,9 @@ Examples:
 
 mccabe('methanol', 'water', xd = 0.95, xb = 0.1, P = 1)
 
-![image](https://github.com/Chlvan/mccabepy/assets/112746859/14cdcbab-1358-4ff6-b03e-981457804715)
+![image](https://github.com/Victor-Liang-ChE/mccabepy/assets/112746859/a2e34606-5c08-4e4b-88d5-bfed572103b1)
 
-Steps = 4
+mccabe('methanol', 'water', xd = 0.95, xb = 0.01, P = 1, q = 1, R = 3)
+
+![image](https://github.com/Victor-Liang-ChE/mccabepy/assets/112746859/7fc3b6ff-b295-44ba-bcff-01082478eb4f)
+
