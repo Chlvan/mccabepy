@@ -6,7 +6,7 @@ from scipy.optimize import fsolve
 import warnings
 from numpy import RankWarning, VisibleDeprecationWarning
 
-def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = None, stages = True, feedstage = True, pointson = True):
+def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = None, stages = True, feedstage = True, pointson = True, showplot = True, values = False):
 
     # Suppress Errors
     warnings.simplefilter('ignore', RankWarning)
@@ -25,6 +25,12 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
         Pgiven = False
 
     #Check for q and R value condition
+    if q is not None and R is None:
+        print('Please provide a R value')
+        return None
+    if R is not None and q is None:
+        print('Please provide a q value')
+        return None
     if q is not None and R is not None:
         if q == 1: # this will make the slopes infinity
             feedslope = 1e10
@@ -35,7 +41,7 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
         else:
             rectifyslope = R/(R + 1)
         if feedslope == rectifyslope:
-            print('Please provide a valid q and R value')
+            print('Please provide valid q and R values')
             return None
 
     # Get the equilibrium data
@@ -80,6 +86,10 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
     stages = 0 # initialize the number of stages
     x = xd # start off at the distillation composition
     if q is None and R is None:
+        xs = []
+        ys = []
+        xs.append(x)
+        ys.append(x)
         while x > xb:
             def difference(xval):
                 return p(xval) - x
@@ -91,11 +101,17 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
             plt.plot([x, intersect], [x,x], ls = '-', color = 'black') # ([initialx, finalx],[initialy, finaly])
             plt.plot([intersect, intersect], [x, intersect], ls = '-', color = 'black') # ([initialx, finalx],[initialy, finaly])
             x = intersect
+            xs.append(x)
+            ys.append(x)
             stages += 1
 
     # Perform step off for feed condition
     else:
         y = xd
+        xs = []
+        ys = []
+        xs.append(x)
+        ys.append(y)
         feedstage = 1
         while x > xb:
             def difference(xval):
@@ -110,6 +126,8 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
                 plt.plot([intersect, intersect], [y, rectifying(intersect)], ls = '-', color = 'black')
                 x = intersect
                 y = rectifying(intersect)
+                xs.append(x)
+                ys.append(x)
                 stages += 1
                 feedstage += 1
             else:
@@ -117,6 +135,8 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
                 plt.plot([intersect, intersect], [y, stripping(intersect)], ls = '-', color = 'black')
                 x = intersect
                 y = stripping(intersect)
+                xs.append(x)
+                ys.append(x)
                 stages += 1
 
     # Add labels to the plot
@@ -128,13 +148,15 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
     if pointson:
         plt.plot(xd, xd, 'ro')
         plt.plot(xb, xb, 'ro')
-        plt.plot(xf, xf, 'ro')
+        if q is not None and R is not None:
+            plt.plot(xf, xf, 'ro')
         ax.annotate('xd', (xd, xd), textcoords="offset points", xytext=(0,-15), ha='center')
         if xb < 0.05:
             ax.annotate('xb', (xb, xb), textcoords="offset points", xytext=(15,-3), ha='center')
         else:
             ax.annotate('xb', (xb, xb), textcoords="offset points", xytext=(0,-15), ha='center')
-        ax.annotate('xf', (xf, xf), textcoords="offset points", xytext=(0,-15), ha='center')
+        if q is not None and R is not None:
+            ax.annotate('xf', (xf, xf), textcoords="offset points", xytext=(0,-15), ha='center')
         ax.tick_params(labelsize = 14)
         ax.set_xlim(0,1)
         ax.set_ylim(0,1)
@@ -142,23 +164,40 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
     # Creating a nice output boxes
     textstr1 = '\n'.join((
         r'$Input:$',
-        r'$x_d=%.2f$' % (xd, ),
-        r'$x_f=%.2f$' % (xf, ),
-        r'$x_b=%.2f$' % (xb, ),
-        r'$q=%.2f$' % (q, ),
-        r'$R=%.2f$' % (R, )))
+        r'$x_D=%.2f$' % (xd, ),
+        r'$x_F=%.2f$' % (xf, ),
+        r'$x_B=%.2f$' % (xb, ),
+        ))  # Close the parentheses here
+    if q is not None and R is not None:
+        textstr1 += '\n' + '\n'.join((
+            r'$q=%.2f$' % (q, ),
+            r'$R=%.2f$' % (R, ),
+        ))  # Close the parentheses here
     textstr2 = '\n'.join((
         r'$Output:$',
         r'$Stages=%.0f$' % (stages, ),
-        r'$Feed \:Stage=%.0f$' % (feedstage, )))
+        ))
+    if q is not None and R is not None:
+        textstr2 += '\n' + '\n'.join((
+            r'$Feed \:Stage=%.0f$' % (feedstage, ),
+        ))
     # place a text box in upper left in axes coords
     props = dict(boxstyle='round', facecolor='green', alpha=0.2)
     plt.text(0.55, 0.05, textstr1, fontsize=10, verticalalignment='bottom', bbox=props)
     plt.text(0.75, 0.05, textstr2, fontsize=10, verticalalignment='bottom', bbox=props)
 
     # Show the plot
-    plt.show()
+    if showplot:
+        plt.show()
+    
+    # Return the values
+    if values:
+        if q is not None and R is not None:
+            return xs, ys, stages, feedstage, xf, xsol, ysol
+        else:
+            return xs, ys
 
 # %%
-#mccabe('methanol', 'water', xd = 0.95, xb = 0.01, P = 1, q = 1, R = 3)
+mccabe('methanol', 'water', xd = 0.95, xb = 0.01, P = 1, q = 1, R = 3)
+mccabe('methanol', 'water', xd = 0.95, xb = 0.1, P = 1)
 # %%
