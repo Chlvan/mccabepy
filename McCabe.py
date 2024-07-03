@@ -150,7 +150,10 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
         plt.plot(xb, xb, 'ro')
         if q is not None and R is not None:
             plt.plot(xf, xf, 'ro')
-        ax.annotate('xd', (xd, xd), textcoords="offset points", xytext=(0,-15), ha='center')
+        if xd > 0.95:
+            ax.annotate('xd', (xd, xd), textcoords="offset points", xytext=(-3,-15), ha='center')
+        else:
+            ax.annotate('xd', (xd, xd), textcoords="offset points", xytext=(0,-15), ha='center')
         if xb < 0.05:
             ax.annotate('xb', (xb, xb), textcoords="offset points", xytext=(15,-3), ha='center')
         else:
@@ -198,6 +201,6 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
             return xs, ys
 
 # %%
-mccabe('methanol', 'water', xd = 0.95, xb = 0.01, P = 1, q = 1, R = 3)
-mccabe('methanol', 'water', xd = 0.95, xb = 0.1, P = 1)
+mccabe('methanol', 'water', xd = 0.99, xb = 0.01, P = 1, q = 1, R = 3)
+mccabe('methanol', 'water', xd = 0.99, xb = 0.1, P = 1)
 # %%
