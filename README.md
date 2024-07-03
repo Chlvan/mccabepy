@@ -6,7 +6,7 @@ Required Inputs:
 
 Optional Inputs: 
 
-feed composition, murphree tray efficiency, and either reflux ratio or feed quality
+feed composition, murphree tray efficiency, and reflux ratio with a feed quality
 
 Miscellaneous Inputs:
 
