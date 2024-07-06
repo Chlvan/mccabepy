@@ -6,7 +6,67 @@ from scipy.optimize import fsolve
 import warnings
 from numpy import RankWarning, VisibleDeprecationWarning
 
-def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = None, stages = True, feedstage = True, pointson = True, showplot = True, values = False):
+def mccabe(comp1, comp2, xd, xb, xf, P = None, T = None, R = None, q = None, ME = None, pointson = True, showplot = True, values = False):
+    r"""
+    Generate a McCabe-Thiele plot for a binary mixture of two components.
+
+    Creates variations of McCabe-Thiele plots depending on what the user inputs or doesn't input.
+
+    Parameters
+    ----------
+    comp1 : string, required
+        Name of the first component. Accepted: IUPAC name, CAS number, common name.
+    comp2 : string, required
+        Name of the second component. Accepted: IUPAC name, CAS number, common name.
+    xd : float, required
+        Distillate composition. Must be between and including 0 and 1.
+    xb : float, required
+        Bottom composition. Must be between and including 0 and 1. 
+    xf : float, optional
+        Feed composition. Must be between and including 0 and 1. Required if q or R is given.
+    P : float, required if T is not given
+        Pressure in bar, required if T is not given.
+    T : float, required if P is not given
+        Temperature in K, required if P is not given.
+    R : float, optional
+        Reflux ratio, required if q or xf given.
+    q : float, optional
+        Feed ratio, required if R or xf given.
+    ME : float, optional
+        Murphree Efficiency. Default will generate a McCabe-Thiele plot at complete Murphree Efficiency.
+    pointson : bool, optional
+        If true, display the distillate, bottoms, and feed points on the plot. Default is True.
+    showplot : bool, optional
+        If true, display the plot. Default is True.
+    values : bool, optional
+        If true, return calculated values. Default is False.
+
+    Returns
+    -------
+    x
+        Liquid mole fraction of comp1.
+    y
+        Vapor mole fraction of comp1.
+    stages
+        Number of stages required to achieve desired separation.
+    feedstage
+        Ideal feed stage.
+    xsol
+        x value of the intersection of the 3 operating lines.
+    ysol
+        y value of the intersection of the 3 operating lines.
+
+    Notes
+    -----
+    Given comp1, comp2, T/P, xd, and xb will generate the McCabe-Thiele plot at total reflux conditions.
+
+    Given comp1, comp2, T/P, xd, xb, xf, q, and R will generate the McCabe-Thiele plot with a rectifying line, feed line, and a stripping line.
+
+    Examples
+    --------
+    >>> mccabe('acetone', 'benzene', xd = 0.97, xb = 0.1, P = 1) # Generate a McCabe-Thiele plot for a acetone and benzene mixture at 1 bar.
+    >>> mccabe('methanol', 'water', xd = 0.9, xb = 0.15, xf = 0.5, T = 300, q = 1.2, R = 3) # Generate a McCabe-Thiele plot for a methanol and water mixture at 300 K with a given feed composition and reflux ratio.
+    """
 
     # Suppress Errors
     warnings.simplefilter('ignore', RankWarning)
@@ -59,6 +119,8 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
     ax = fig.add_subplot(111)
     plt.plot(xi, p(xi))
     plt.plot(xi, xi)
+    if ME is not None:
+        plt.plot(xi, p(xi), ls = '--', color = 'purple', label = 'Murphree Efficiency Curve')
 
     # Define and plot the feed, rectifying, and stripping lines and intersection
     if q is not None and R is not None:
@@ -95,7 +157,10 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
         ys.append(x)
         while x > xb:
             def difference(xval):
-                return p(xval) - x
+                if ME is not None:
+                    return ME*p(xval) - x #CHECKKKKKKKKKKKKKKK
+                else:
+                    return p(xval) - x
             intersect = fsolve(difference, 0)
             if intersect > x or intersect == x:
                 print('Cannot perform McCabe-Thiele Method as equilibrium curve is below y=x at distillation composition')
@@ -118,8 +183,14 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
         feedstage = 1
         while x > xb:
             def difference(xval):
-                return p(xval) - y
+                if ME is not None:
+                    return ME*p(xval) - y #CHECKKKKKKKKKKKKKKK
+                else:
+                    return p(xval) - y
             intersect = fsolve(difference, 0)
+            if intersect > x or intersect == x:
+                print('Cannot perform McCabe-Thiele Method as equilibrium curve is below y=x at distillation composition')
+                break
             if intersect > x or intersect == x:
                 print('Cannot perform McCabe-Thiele Method as equilibrium curve is below y=x at distillation composition')
                 break
@@ -149,16 +220,16 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
 
     # Allow for points to be shown
     if pointson:
-        plt.plot(xd, xd, 'ro')
-        plt.plot(xb, xb, 'ro')
+        plt.plot(xd, xd, 'ro', markersize = 5)
+        plt.plot(xb, xb, 'ro', markersize = 5)
         if q is not None and R is not None:
             plt.plot(xf, xf, 'ro')
         if xd > 0.95:
-            ax.annotate('xd', (xd, xd), textcoords="offset points", xytext=(-3,-15), ha='center')
+            ax.annotate('xd', (xd, xd), textcoords="offset points", xytext=(-2,-15), ha='center')
         else:
             ax.annotate('xd', (xd, xd), textcoords="offset points", xytext=(0,-15), ha='center')
         if xb < 0.05:
-            ax.annotate('xb', (xb, xb), textcoords="offset points", xytext=(15,-3), ha='center')
+            ax.annotate('xb', (xb, xb), textcoords="offset points", xytext=(15,-2), ha='center')
         else:
             ax.annotate('xb', (xb, xb), textcoords="offset points", xytext=(0,-15), ha='center')
         if q is not None and R is not None:
@@ -199,11 +270,12 @@ def mccabe(comp1, comp2, xd, xb, xf = 0.5, P = None, T = None, R = None, q = Non
     # Return the values
     if values:
         if q is not None and R is not None:
-            return xs, ys, stages, feedstage, xf, xsol, ysol
+            return xs, ys, stages, feedstage, xsol, ysol
         else:
             return xs, ys
 
 # %%
-mccabe('acetone', 'benzene', xd = 0.9, xb = 0.01, T = 298, q = 1.2, R = 3)
+mccabe('methanol', 'water', xd = 0.9, xb = 0.01, T = 300, q = 1.2, R = 3)
+#mccabe('acetone', 'benzene', xd = 0.9, xb = 0.01, T = 298, q = 1.2, R = 3, ME = 0.8)
 #mccabe('acetone', 'benzene', xd = 0.97, xb = 0.1, P = 1)
 # %%
