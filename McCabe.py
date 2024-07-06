@@ -6,7 +6,7 @@ from scipy.optimize import fsolve
 import warnings
 from numpy import RankWarning, VisibleDeprecationWarning
 
-def mccabe(comp1, comp2, xd, xb, xf, P = None, T = None, R = None, q = None, ME = None, pointson = True, showplot = True, values = False):
+def mccabe(comp1, comp2, xd, xb, xf = None, P = None, T = None, R = None, q = None, ME = None, pointson = True, showplot = True, values = False):
     r"""
     Generate a McCabe-Thiele plot for a binary mixture of two components.
 
@@ -58,9 +58,9 @@ def mccabe(comp1, comp2, xd, xb, xf, P = None, T = None, R = None, q = None, ME 
 
     Notes
     -----
-    Given comp1, comp2, T/P, xd, and xb will generate the McCabe-Thiele plot at total reflux conditions.
+    Given comp1, comp2, T or P, xd, and xb will generate the McCabe-Thiele plot at total reflux conditions.
 
-    Given comp1, comp2, T/P, xd, xb, xf, q, and R will generate the McCabe-Thiele plot with a rectifying line, feed line, and a stripping line.
+    Given comp1, comp2, T or P, xd, xb, xf, q, and R will generate the McCabe-Thiele plot with a rectifying line, feed line, and a stripping line.
 
     Examples
     --------
@@ -275,7 +275,7 @@ def mccabe(comp1, comp2, xd, xb, xf, P = None, T = None, R = None, q = None, ME 
             return xs, ys
 
 # %%
-mccabe('methanol', 'water', xd = 0.9, xb = 0.01, T = 300, q = 1.2, R = 3)
+mccabe('methanol', 'water', xd = 0.9, xb = 0.01, xf = 0.5, T = 300, q = 1.2, R = 3)
 #mccabe('acetone', 'benzene', xd = 0.9, xb = 0.01, T = 298, q = 1.2, R = 3, ME = 0.8)
 #mccabe('acetone', 'benzene', xd = 0.97, xb = 0.1, P = 1)
 # %%
