@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import fsolve
 import warnings
-from numpy import RankWarning, VisibleDeprecationWarning
+from numpy.exceptions import RankWarning, VisibleDeprecationWarning
 
 def mccabe(comp1, comp2, xd, xb, xf = None, P = None, T = None, R = None, q = None, ME = None, pointson = True, showplot = True, values = False):
     r"""
@@ -140,6 +140,11 @@ def mccabe(comp1, comp2, xd, xb, xf = None, P = None, T = None, R = None, q = No
         else:
             xsol = fsolve(feedrectintersection, xguess)  # fsolve returns an array, get the first element
             ysol = rectifying(xsol)
+        # Ensure xsol and ysol are single values
+        if isinstance(xsol, np.ndarray):
+            xsol = xsol[0]
+        if isinstance(ysol, np.ndarray):
+            ysol = ysol[0]
         # define the stripping line as the line from xb to the intersection of the rectifying line and the feed line
         def stripping(xval):
             return (ysol-xb)*(xval-xb)/(xsol-xb)+xb
@@ -151,8 +156,8 @@ def mccabe(comp1, comp2, xd, xb, xf = None, P = None, T = None, R = None, q = No
     stages = 0 # initialize the number of stages
     x = xd # start off at the distillation composition
     if q is None and R is None:
-        xs = []
-        ys = []
+        xs = np.array([0, 0, 0])
+        ys = np.array([0, 0, 0])
         xs.append(x)
         ys.append(x)
         while x > xb:
@@ -194,6 +199,12 @@ def mccabe(comp1, comp2, xd, xb, xf = None, P = None, T = None, R = None, q = No
             if intersect > x or intersect == x:
                 print('Cannot perform McCabe-Thiele Method as equilibrium curve is below y=x at distillation composition')
                 break
+            if isinstance(x, np.ndarray):
+                x = x[0]
+            if isinstance(y, np.ndarray):
+                y = y[0]
+            if isinstance(intersect, np.ndarray):
+                intersect = intersect[0]
             plt.plot([x, intersect], [y,y], ls = '-', color = 'black')
             if intersect > xsol:
                 # draw a horizontal line from rectifying line to the best fit curve 
@@ -278,4 +289,5 @@ def mccabe(comp1, comp2, xd, xb, xf = None, P = None, T = None, R = None, q = No
 mccabe('methanol', 'water', xd = 0.9, xb = 0.01, xf = 0.5, T = 300, q = 1.2, R = 3)
 #mccabe('acetone', 'benzene', xd = 0.9, xb = 0.01, T = 298, q = 1.2, R = 3, ME = 0.8)
 #mccabe('acetone', 'benzene', xd = 0.97, xb = 0.1, P = 1)
+# %%
 # %%
